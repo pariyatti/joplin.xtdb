@@ -1,0 +1,7 @@
+{:migrators {:cx-mig "test-resources/joplin/migrators/crux"}
+ :seeds     {:cx-seed "seeds.cx/run"}
+ :databases {:cx-dev {:type :cx
+                      :conf {}}}
+ :environments {:dev [{:db       :cx-dev
+                       :migrator :cx-mig
+                       :seed     :cx-seed}]}}
