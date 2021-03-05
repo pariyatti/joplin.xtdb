@@ -8,5 +8,4 @@
 
 (deftest adding-migrations
   (testing "adds one migration"
-    ;; (jop/migrate )
-    ))
+    (repl/migrate config :dev)))

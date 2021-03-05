@@ -7,7 +7,7 @@
             :url "http://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [joplin.core "0.3.11"]
-                 [juxt/crux-core "21.02-1.15.0-beta"]
-                 [tick "0.4.30-alpha"]]
+                 [juxt/crux-core "21.02-1.15.0-beta"]]
 
-  :profiles {:dev {:resource-paths ["test-resources"]}})
+  :profiles {:dev {:resource-paths ["test-resources"]
+                   :dependencies [[tick "0.4.30-alpha"]]}})

@@ -1,8 +1,7 @@
 (ns joplin.crux.database
   (:require [crux.api :as x]
             [joplin.core :as j] ;; clojure-lsp hates `:refer :all` for some reason
-            [ragtime.protocols :refer [DataStore]]
-            [tick.alpha.api :as t]))
+            [ragtime.protocols :refer [DataStore]]))
 
 (def crux-node (atom nil))
 
@@ -21,7 +20,7 @@
     (when-let [conn (get-connection (:conf this))]
       (x/submit-tx conn [[:crux.tx/put {:crux.db/id (java.util.UUID/randomUUID)
                                         :migrations/id id
-                                        :migrations/created-at (t/now)}]])))
+                                        :migrations/created-at (java.util.Date.)}]])))
 
   (remove-migration-id [this id]
     (throw (Exception. "Not implemented - will we allow rollbacks?")))
