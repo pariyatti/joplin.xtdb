@@ -5,7 +5,7 @@
 
 (def crux-node (atom nil))
 
-(defn get-connection [conf]
+(defn get-node [conf]
   (if @crux-node
     @crux-node
     (reset! crux-node (x/start-node conf))))
@@ -17,17 +17,20 @@
   DataStore
 
   (add-migration-id [this id]
-    (when-let [conn (get-connection (:conf this))]
-      (x/submit-tx conn [[:crux.tx/put {:crux.db/id (java.util.UUID/randomUUID)
-                                        :migrations/id id
-                                        :migrations/created-at (java.util.Date.)}]])))
+    (when-let [node (get-node (:conf this))]
+      (let [tx (x/submit-tx node [[:crux.tx/put {:crux.db/id id
+                                                 :migrations/id id
+                                                 :migrations/created-at (java.util.Date.)}]])
+            _ (x/await-tx node tx)]
+        (when-not (x/entity (x/db node) id)
+          (throw (Exception. (format "Migration %s failed to apply." id)))))))
 
   (remove-migration-id [this id]
     (throw (Exception. "Not implemented - will we allow rollbacks?")))
 
   (applied-migration-ids [this]
-    (when-let [conn (get-connection (:conf this))]
-      (->> (x/q (x/db conn)
+    (when-let [node (get-node (:conf this))]
+      (->> (x/q (x/db node)
                 '{:find [id created-at]
                   :where [[e :migrations/id id]
                           [e :migrations/created-at created-at]]})
