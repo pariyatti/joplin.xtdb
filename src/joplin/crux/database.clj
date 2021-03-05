@@ -25,8 +25,19 @@
         (when-not (x/entity (x/db node) id)
           (throw (Exception. (format "Migration %s failed to apply." id)))))))
 
-  (remove-migration-id [this id]
-    (throw (Exception. "Not implemented - will we allow rollbacks?")))
+  (remove-migration-id
+    "This function may seem naive, but it is actually the most honest approach.
+     Crux does not prevent users from using `delete` operations but it *does*
+     force its users to acknowledge that `delete` is a command, not a mutation.
+     Joplin is no exception to this rule. We can 'delete' a migration id just as
+     we would any other data, but the history of the migration remains. Since the
+     historical timeline is true, it is also correct."
+    [this id]
+    (when-let [node (get-node (:conf this))]
+      (let [tx (x/submit-tx node [[:crux.tx/delete id]])
+            _ (x/await-tx node tx)]
+        (when (x/entity (x/db node) id)
+          (throw (Exception. (format "Migration %s failed to apply." id)))))))
 
   (applied-migration-ids [this]
     (when-let [node (get-node (:conf this))]
