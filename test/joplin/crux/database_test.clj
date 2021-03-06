@@ -20,6 +20,11 @@
        '{:find [id]
          :where [[e :migrations/id id]]}))
 
+(defn query-seeds []
+  (x/q (x/db (sut/get-node (crux-conf)))
+       '{:find [e]
+         :where [[e :hamster/name n]]}))
+
 (deftest adding-migrations
   (testing "adds one migration"
     (repl/migrate config :dev)
@@ -50,13 +55,25 @@
     (destroy-node)
     (repl/migrate config :dev)
     (repl/seed config :dev)
-    (is (= 3 (-> (x/q (x/db (sut/get-node (crux-conf)))
-                      '{:find [e]
-                        :where [[e :hamster/name n]]})
+    (is (= 3 (-> (query-seeds)
                  (count))))))
 
-;; (deftest resetting
-;;   (repl/reset config :dev :cx-dev))
+(deftest resetting
+  (testing "resetting the node removes and replaces old migrations"
+    (destroy-node)
+    (repl/migrate config :dev)
+    (repl/seed config :dev)
+    (repl/reset config :dev :cx-dev)
+    (is (= 1 (-> (query-migrations)
+                 (count)))))
+
+  (testing "resetting the node does NOT remove old seeds"
+    (destroy-node)
+    (repl/migrate config :dev)
+    (repl/seed config :dev)
+    (repl/reset config :dev :cx-dev)
+    (is (= 6 (-> (query-seeds)
+                 (count))))))
 
 ;; TODO:
 ;; (repl/seed)
