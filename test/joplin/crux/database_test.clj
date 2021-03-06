@@ -3,12 +3,20 @@
             [crux.api :as x]
             [joplin.crux.database :as sut]
             [joplin.alias :refer [*load-config*]]
-            [joplin.repl :as repl]))
+            [joplin.repl :as repl]
+            [seeds.cx]))
 
 (def config (*load-config* "joplin-cx.edn"))
 
+(defn crux-conf []
+  (-> config :databases :cx-dev :conf))
+
+(defn destroy-node []
+  (reset! sut/crux-node nil)
+  (sut/get-node (crux-conf)))
+
 (defn query-migrations []
-  (x/q (x/db (sut/get-node config))
+  (x/q (x/db (sut/get-node (crux-conf)))
        '{:find [id]
          :where [[e :migrations/id id]]}))
 
@@ -32,10 +40,23 @@
       (is (= 1 (-> (query-migrations)
                    (count))))
       (repl/rollback config :dev :cx-dev 1)
-      (is (= 1 (-> (x/q (x/db (sut/get-node config) between)
+      (is (= 1 (-> (x/q (x/db (sut/get-node (crux-conf)) between)
                         '{:find [e]
                           :where [[e :crux.db/id "20210302000000-test"]]})
                    (count)))))))
+
+(deftest seeding
+  (testing "adds seed data"
+    (destroy-node)
+    (repl/migrate config :dev)
+    (repl/seed config :dev)
+    (is (= 3 (-> (x/q (x/db (sut/get-node (crux-conf)))
+                      '{:find [e]
+                        :where [[e :hamster/name n]]})
+                 (count))))))
+
+;; (deftest resetting
+;;   (repl/reset config :dev :cx-dev))
 
 ;; TODO:
 ;; (repl/seed)
