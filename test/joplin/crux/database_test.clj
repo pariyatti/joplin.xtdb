@@ -32,10 +32,9 @@
       (is (= 1 (-> (query-migrations)
                    (count))))
       (repl/rollback config :dev :cx-dev 1)
-      (is (= 1 (-> (x/q (x/db (sut/get-node config))
-                        '{:find [id]
-                          :where [[e :migrations/id id]]}
-                        between)
+      (is (= 1 (-> (x/q (x/db (sut/get-node config) between)
+                        '{:find [e]
+                          :where [[e :crux.db/id "20210302000000-test"]]})
                    (count)))))))
 
 ;; TODO:
