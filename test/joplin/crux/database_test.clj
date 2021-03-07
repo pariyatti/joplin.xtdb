@@ -78,6 +78,7 @@
     (destroy-node!)
     (repl/migrate config :dev)
     (repl/seed config :dev)
+    (is (= 1 (-> (query-migrations) (count))))
     (repl/reset config :dev :cx-dev)
     (is (= 1 (-> (query-migrations) (count)))))
 
@@ -85,6 +86,7 @@
     (destroy-node!)
     (repl/migrate config :dev)
     (repl/seed config :dev)
+    (is (= 3 (-> (query-seeds) (count))))
     (repl/reset config :dev :cx-dev)
     (is (= 6 (-> (query-seeds) (count))))))
 
