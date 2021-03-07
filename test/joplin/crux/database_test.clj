@@ -1,5 +1,6 @@
 (ns joplin.crux.database-test
   (:require [clojure.test :refer :all]
+            [clojure.java.io :as io]
             [crux.api :as x]
             [joplin.crux.database :as sut]
             [joplin.alias :refer [*load-config*]]
@@ -75,10 +76,19 @@
     (is (= 6 (-> (query-seeds)
                  (count))))))
 
+(deftest pending
+  (testing "pending knows how many migrations are left to run"
+    (destroy-node)
+    (repl/migrate config :dev)
+    (io/copy (io/file "test-resources/fixtures/20210306000000_second_migrator.clj")
+             (io/file "test-resources/joplin/migrators/crux/20210306000000_second_migrator.clj"))
+    (is (= "Pending migrations (20210306000000-second-migrator)\n"
+           (with-out-str (repl/pending config :dev :cx-dev))))
+    (io/delete-file "test-resources/joplin/migrators/crux/20210306000000_second_migrator.clj"
+                    :ignore-missing-file)))
+
 ;; TODO:
-;; (repl/seed)
-;; (repl/reset)
-;; (repl/pending)
+;; - add fixtures
 ;; (repl/create)
 ;; - use transaction fns
 ;; - extract a submit+await+entity+exception fn
