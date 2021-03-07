@@ -1,6 +1,7 @@
 (ns joplin.crux.database-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
+            [babashka.fs :as fs]
             [crux.api :as x]
             [joplin.crux.database :as sut]
             [joplin.alias :refer [*load-config*]]
@@ -17,8 +18,11 @@
   (sut/get-node (crux-conf)))
 
 (defn destroy-fixture-file-copies! []
-  (io/delete-file "test-resources/joplin/migrators/crux/20210306000000_second_migrator.clj"
-                  :ignore-missing-file))
+  (fs/delete-if-exists "test-resources/joplin/migrators/crux/20210306000000_second_migrator.clj")
+  (some->> (fs/glob "test-resources/joplin/migrators/crux/"
+                    "**_wakkawakka.clj")
+           first
+           fs/delete-if-exists))
 
 (defn copy-fixture-file! []
   (io/copy (io/file "test-resources/fixtures/20210306000000_second_migrator.clj")
@@ -97,7 +101,14 @@
     (is (= "Pending migrations (20210306000000-second-migrator)\n"
            (with-out-str (repl/pending config :dev :cx-dev))))))
 
+(deftest creating-migrations
+  (testing "creates an empty migration"
+    (repl/create config :dev :cx-dev "wakkawakka")
+    (is (= 1 (->> (fs/glob "test-resources/joplin/migrators/crux/"
+                           "**_wakkawakka.clj")
+                  (map str)
+                  count)))))
+
 ;; TODO:
-;; (repl/create)
 ;; - use transaction fns
 ;; - extract a submit+await+entity+exception fn
