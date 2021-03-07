@@ -56,6 +56,7 @@ lein create prod cx-prod add_users_schema
 
 - It was suggested by @jarohen that `joplin.crux` could use [Transaction Functions](https://opencrux.com/reference/21.02-1.15.0/transactions.html#transaction-functions) to ensure that all migrations executed at once share the same `tx-time`. This will definitely make the historical timeline for schema and data migrations cleaner, but it also requires a "meta schema change" of sorts, which is the Transaction Function itself. I'm a bit nervous making any assumptions about what sort of entities the consumers of `joplin.crux` want in their database, so I've left the direct (naive) implementation for now. This upgrade can always come later without impacting historical migrations.
 
+- extract a submit+await+entity+exception fn ... all migrations need to be synchronous anyway.
 
 ## License
 

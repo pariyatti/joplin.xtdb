@@ -108,7 +108,3 @@
                            "**_wakkawakka.clj")
                   (map str)
                   count)))))
-
-;; TODO:
-;; - use transaction fns
-;; - extract a submit+await+entity+exception fn
