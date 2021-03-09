@@ -10,6 +10,13 @@
     @crux-node
     (reset! crux-node (x/start-node conf))))
 
+(defn transact! [node txns & [error-msg]]
+  (let [tx (->> txns
+                (x/submit-tx node)
+                (x/await-tx node))]
+    (when-not (x/tx-committed? node tx)
+      (throw (Exception. error-msg)))))
+
 ;; ============================================================================
 ;; Ragtime interface
 
@@ -17,13 +24,11 @@
   DataStore
 
   (add-migration-id [this id]
-    (when-let [node (get-node (:conf this))]
-      (let [tx (x/submit-tx node [[:crux.tx/put {:crux.db/id id
-                                                 :migrations/id id
-                                                 :migrations/created-at (java.util.Date.)}]])
-            _ (x/await-tx node tx)]
-        (when-not (x/entity (x/db node) id)
-          (throw (Exception. (format "Migration %s failed to apply." id)))))))
+    (transact! (get-node (:conf this))
+               [[:crux.tx/put {:crux.db/id id
+                               :migrations/id id
+                               :migrations/created-at (java.util.Date.)}]]
+               (format "Migration '%s' failed to apply." id)))
 
   (remove-migration-id
     ;; "This function may seem naive, but it is actually the most honest approach.
@@ -33,11 +38,9 @@
     ;;  we would any other data, but the history of the migration remains. Since the
     ;;  historical timeline is true, it is also correct."
     [this id]
-    (when-let [node (get-node (:conf this))]
-      (let [tx (x/submit-tx node [[:crux.tx/delete id]])
-            _ (x/await-tx node tx)]
-        (when (x/entity (x/db node) id)
-          (throw (Exception. (format "Migration %s failed to apply." id)))))))
+    (transact! (get-node (:conf this))
+               [[:crux.tx/delete id]]
+               (format "Rollback '%s' failed to apply." id)))
 
   (applied-migration-ids [this]
     (when-let [node (get-node (:conf this))]

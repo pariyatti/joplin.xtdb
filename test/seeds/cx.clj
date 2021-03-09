@@ -12,9 +12,5 @@
                               :hamster/age 3}]
                [:crux.tx/put {:crux.db/id (java.util.UUID/randomUUID)
                               :hamster/name "Gnarly Rote"
-                              :hamster/age 99}]]
-          tx (->> txs
-                  (x/submit-tx node)
-                  (x/await-tx node))]
-      (when-not (x/tx-committed? node tx)
-        (throw (Exception. (format "Seed '%s' failed to apply." (ns-name *ns*))))))))
+                              :hamster/age 99}]]]
+      (d/transact! node txs (format "Seed '%s' failed to apply." (ns-name *ns*))))))
