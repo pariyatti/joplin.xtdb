@@ -57,21 +57,21 @@
 ;; ============================================================================
 ;; Joplin interface
 
-(defmethod j/migrate-db :cx [target & args]
+(defmethod j/migrate-db :crux [target & args]
   (apply j/do-migrate (j/get-migrations (:migrator target))
          (->CruxDatabase target) args))
 
-(defmethod j/rollback-db :cx [target amount-or-id & args]
+(defmethod j/rollback-db :crux [target amount-or-id & args]
   (apply j/do-rollback (j/get-migrations (:migrator target))
          (->CruxDatabase target) amount-or-id args))
 
-(defmethod j/seed-db :cx [target & args]
+(defmethod j/seed-db :crux [target & args]
   (apply j/do-seed-fn (j/get-migrations (:migrator target))
          (->CruxDatabase target) target args))
 
-(defmethod j/pending-migrations :cx [target & _args]
+(defmethod j/pending-migrations :crux [target & _args]
   (j/do-pending-migrations (->CruxDatabase target)
                            (j/get-migrations (:migrator target))))
 
-(defmethod j/create-migration :cx [target id & _args]
+(defmethod j/create-migration :crux [target id & _args]
   (j/do-create-migration target id "joplin.crux.database"))

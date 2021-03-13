@@ -9,15 +9,15 @@
 You can use the `joplin.repl` namespace from within Clojure itself. In these examples:
 - `config` is an example `joplin config` (EDN)
 - `:prod` is an example _environment_
-- `:cx-prod` is an example _database_
+- `:crux-prod` is an example _database_
 
 ```clojure
 (joplin.repl/migrate config :prod)
-(joplin.repl/rollback config :prod :cx-prod 1)
-;; or (joplin.repl/rollback config :prod :cx-prod 20151215114952-users)
+(joplin.repl/rollback config :prod :crux-prod 1)
+;; or (joplin.repl/rollback config :prod :crux-prod 20151215114952-users)
 (joplin.repl/seed config :prod)
-(joplin.repl/reset config :prod :cx-prod)
-(joplin.repl/pending config :prod :cx-prod)
+(joplin.repl/reset config :prod :crux-prod)
+(joplin.repl/pending config :prod :crux-prod)
 ```
 
 ## Usage - Command Line
@@ -26,23 +26,23 @@ You can run a lein alias from the command line if you [configure them in your `p
 
 ```shell
 lein migrate prod
-lein rollback prod cx-prod 1
-# or lein rollback prod cx-prod 20151215114952-users
+lein rollback prod crux-prod 1
+# or lein rollback prod crux-prod 20151215114952-users
 lein seed prod
-lein reset prod cx-prod
-lein pending prod cx-prod
+lein reset prod crux-prod
+lein pending prod crux-prod
 ```
 
 ## Generate Migrations
 
 ```clojure
-(joplin.repl/create config :prod :cx-prod "add_users_schema")
+(joplin.repl/create config :prod :crux-prod "add_users_schema")
 ```
 
 or
 
 ```shell
-lein create prod cx-prod add_users_schema
+lein create prod crux-prod add_users_schema
 ```
 
 ## Additional Documentation

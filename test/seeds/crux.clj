@@ -1,4 +1,4 @@
-(ns seeds.cx
+(ns seeds.crux
   (:require [crux.api :as x]
             [joplin.crux.database :as d]))
 

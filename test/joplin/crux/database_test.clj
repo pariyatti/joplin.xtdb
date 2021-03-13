@@ -6,12 +6,12 @@
             [joplin.crux.database :as sut]
             [joplin.alias :refer [*load-config*]]
             [joplin.repl :as repl]
-            [seeds.cx]))
+            [seeds.crux]))
 
-(def config (*load-config* "joplin-cx.edn"))
+(def config (*load-config* "joplin-crux.edn"))
 
 (defn crux-conf []
-  (-> config :databases :cx-dev :conf))
+  (-> config :databases :crux-dev :conf))
 
 (defn destroy-node! []
   (reset! sut/crux-node nil)
@@ -57,7 +57,7 @@
 (deftest removing-migrations
   (testing "removes one migration from 'now'"
     (repl/migrate config :dev)
-    (repl/rollback config :dev :cx-dev 1)
+    (repl/rollback config :dev :crux-dev 1)
     (is (= 0 (-> (query-migrations) (count)))))
 
   (testing "removing a migration does NOT remove it from valid-time history"
@@ -65,7 +65,7 @@
     (let [between (java.util.Date.)
           _ (Thread/sleep 500)]
       (is (= 1 (-> (query-migrations) (count))))
-      (repl/rollback config :dev :cx-dev 1)
+      (repl/rollback config :dev :crux-dev 1)
       (is (= 1 (-> (x/q (x/db (sut/get-node (crux-conf)) between)
                         '{:find [e]
                           :where [[e :crux.db/id "20210302000000-test"]]})
@@ -83,7 +83,7 @@
     (repl/migrate config :dev)
     (repl/seed config :dev)
     (is (= 1 (-> (query-migrations) (count))))
-    (repl/reset config :dev :cx-dev)
+    (repl/reset config :dev :crux-dev)
     (is (= 1 (-> (query-migrations) (count)))))
 
   (testing "resetting the node does NOT remove old seeds"
@@ -91,7 +91,7 @@
     (repl/migrate config :dev)
     (repl/seed config :dev)
     (is (= 3 (-> (query-seeds) (count))))
-    (repl/reset config :dev :cx-dev)
+    (repl/reset config :dev :crux-dev)
     (is (= 6 (-> (query-seeds) (count))))))
 
 (deftest pending
@@ -99,11 +99,11 @@
     (repl/migrate config :dev)
     (copy-fixture-file!)
     (is (= "Pending migrations (20210306000000-second-migrator)\n"
-           (with-out-str (repl/pending config :dev :cx-dev))))))
+           (with-out-str (repl/pending config :dev :crux-dev))))))
 
 (deftest creating-migrations
   (testing "creates an empty migration"
-    (repl/create config :dev :cx-dev "wakkawakka")
+    (repl/create config :dev :crux-dev "wakkawakka")
     (is (= 1 (->> (fs/glob "test-resources/joplin/migrators/crux/"
                            "**_wakkawakka.clj")
                   (map str)
