@@ -6,16 +6,13 @@
 (defn up [db]
   (let [id "20210302000000-test"
         node (d/get-node (:conf db))
-        tx (x/submit-tx node [[:crux.tx/put {:crux.db/id id
-                                             :schema/id "20210302000000-test"
-                                             :schema/created-at (t/now)}]])
-        _ (x/await-tx node tx)]
-    ;; it might be wise for real migrators to assert the migration was
-    ;; successfully saved like this:
-    (when-not (x/entity (x/db node) id)
-      (throw (Exception. (format "Migrator '%s' failed to apply." id))))))
+        txs [[:crux.tx/put {:crux.db/id id
+                            :schema/id "20210302000000-test"
+                            :schema/created-at (t/now)}]]]
+    (d/transact! node txs (format "Migrator '%s' failed to apply." id))))
 
 (defn down [db]
-  (let [node (d/get-node (:conf db))
-        tx (x/submit-tx node [[:crux.tx/delete "20210302000000-test"]])
-        _ (x/await-tx node tx)]))
+  (let [id "20210302000000-test"
+        node (d/get-node (:conf db))
+        txs [[:crux.tx/delete id]]]
+    (d/transact! node txs (format "Rollback '%s' failed to apply." id))))
