@@ -1,6 +1,6 @@
 (ns joplin.crux.database
   (:require [crux.api :as x]
-            [joplin.core :as j] ;; clojure-lsp hates `:refer :all` for some reason
+            [joplin.core :refer :all] ;; clojure-lsp hates `:refer :all` for some reason
             [ragtime.protocols :refer [DataStore]]))
 
 (def crux-node (atom nil))
@@ -57,21 +57,21 @@
 ;; ============================================================================
 ;; Joplin interface
 
-(defmethod j/migrate-db :crux [target & args]
-  (apply j/do-migrate (j/get-migrations (:migrator target))
+(defmethod migrate-db :crux [target & args]
+  (apply do-migrate (get-migrations (:migrator target))
          (->CruxDatabase target) args))
 
-(defmethod j/rollback-db :crux [target amount-or-id & args]
-  (apply j/do-rollback (j/get-migrations (:migrator target))
+(defmethod rollback-db :crux [target amount-or-id & args]
+  (apply do-rollback (get-migrations (:migrator target))
          (->CruxDatabase target) amount-or-id args))
 
-(defmethod j/seed-db :crux [target & args]
-  (apply j/do-seed-fn (j/get-migrations (:migrator target))
+(defmethod seed-db :crux [target & args]
+  (apply do-seed-fn (get-migrations (:migrator target))
          (->CruxDatabase target) target args))
 
-(defmethod j/pending-migrations :crux [target & _args]
-  (j/do-pending-migrations (->CruxDatabase target)
-                           (j/get-migrations (:migrator target))))
+(defmethod pending-migrations :crux [target & _args]
+  (do-pending-migrations (->CruxDatabase target)
+                           (get-migrations (:migrator target))))
 
-(defmethod j/create-migration :crux [target id & _args]
-  (j/do-create-migration target id "joplin.crux.database"))
+(defmethod create-migration :crux [target id & _args]
+  (do-create-migration target id "joplin.crux.database"))
