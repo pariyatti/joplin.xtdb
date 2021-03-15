@@ -22,7 +22,18 @@ You can use the `joplin.repl` namespace from within Clojure itself. In these exa
 
 ## Usage - Command Line
 
-You can run a lein alias from the command line if you [configure them in your `project.clj`, like in this example.](https://github.com/juxt/joplin/blob/master/example/project.clj#L15)
+You can run a lein alias from the command line if you configure them in your `project.clj`, like so:
+
+```clojure
+:aliases {"migrate"  ["run" "-m" "joplin.crux.alias/migrate"  "joplin/config.edn"]
+          "seed"     ["run" "-m" "joplin.crux.alias/seed"     "joplin/config.edn"]
+          "rollback" ["run" "-m" "joplin.crux.alias/rollback" "joplin/config.edn"]
+          "reset"    ["run" "-m" "joplin.crux.alias/reset"    "joplin/config.edn"]
+          "pending"  ["run" "-m" "joplin.crux.alias/pending"  "joplin/config.edn"]
+          "create"   ["run" "-m" "joplin.crux.alias/create"   "joplin/config.edn"]}
+```
+
+Then you can run Joplin commands from the command line:
 
 ```shell
 lein migrate prod
@@ -32,6 +43,8 @@ lein seed prod
 lein reset prod crux-prod
 lein pending prod crux-prod
 ```
+
+**NOTE:** You must refer to the `joplin.crux.alias` shim in your aliases, unlike the [default alias configuration seen in the joplin.core example.](https://github.com/juxt/joplin/blob/master/example/project.clj#L15). Because `joplin.crux` is a plugin, `joplin.alias` doesn't know about it out of the box. This is arguably a bug in Joplin.
 
 ## Generate Migrations
 
