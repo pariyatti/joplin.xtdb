@@ -1,13 +1,25 @@
 # joplin.crux
 
+Migrate and seed Crux data.
+
+[![Clojars Project](https://img.shields.io/clojars/v/org.pariyatti/joplin.crux.svg)](https://clojars.org/org.pariyatti/joplin.crux)
+
+## Install
+
+lein / boot:
 ```clojure
-[joplin.crux "0.0.1-SNAPSHOT"]
+[org.pariyatti/joplin.crux "0.0.1"]
+```
+
+CLI / deps.edn:
+```clojure
+org.pariyatti/joplin.crux {:mvn/version "0.0.1"}
 ```
 
 ## Usage - Clojure
 
 You can use the `joplin.repl` namespace from within Clojure itself. In these examples:
-- `config` is an example `joplin config` (EDN)
+- `config` is an example Joplin Config (EDN)
 - `:prod` is an example _environment_
 - `:crux-prod` is an example _database_
 
@@ -75,6 +87,44 @@ Run tests:
 
 ```shell
 lein test
+```
+
+## Deploying to Clojars
+
+1. Get admin permissions to the [org.pariyatti Clojars group](https://clojars.org/org.pariyatti). This group is already verified against [pariyatti.org](https://pariyatti.org).
+2. Set up GPG:
+
+```shell
+brew install gnupg2
+echo "GPG_TTY=$(tty)\nexport GPG_TTY" >> ~/.zshrc # or ~/.bash_profile
+gpg --gen-key
+# save your passphrase in your password manager
+gpg --list-keys
+gpg --fingerprint 1A1A11A11AA11A111A1AAA1A11AA1111A11A1111
+gpg --send-keys   1A1A11A11AA11A111A1AAA1A11AA1111A11A1111
+# save your revocation certificate in your password manager:
+cat ~/.gnupg/openpgp-revocs.d/1A1A11A11AA11A111A1AAA1A11AA1111A11A1111.rev
+```
+
+3. Create a [Clojars Deploy Token](https://clojars.org/tokens), which is now mandatory. Save it in your password manager.
+4. Create `~/.lein/credentials.clj` (as described [here](https://tech.toryanderson.com/2020/07/21/deploying-to-clojars-with-the-new-tokens/)):
+
+```clojure
+{#"clojars"
+ {:username "my-web-username"
+  :password "CLOJARS_5a5a5aa5a555555555a55aa..."}}
+```
+
+5. Encrypt it:
+
+```shell
+gpg --default-recipient-self -e ~/.lein/credentials.clj > ~/.lein/credentials.clj.gpg
+```
+
+6. Try it out:
+ 
+```shell
+lein deploy clojars
 ```
 
 ## License
