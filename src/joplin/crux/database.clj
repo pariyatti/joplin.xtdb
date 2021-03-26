@@ -17,6 +17,16 @@
     (when-not (x/tx-committed? node tx)
       (throw (Exception. error-msg)))))
 
+(defn close!
+  "Unfortunately, clients must be responsible for closing
+   the Crux node if they want to use the same REPL with
+   the same underlying disk stores (ex. RocksDB). This is
+   because Joplin cannot close the Crux node after every
+   operation or the in-memory Crux node won't work."
+  []
+  (when @crux-node
+   (.close @crux-node)))
+
 ;; ============================================================================
 ;; Ragtime interface
 
