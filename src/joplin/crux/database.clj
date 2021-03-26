@@ -22,7 +22,10 @@
    the Crux node if they want to use the same REPL with
    the same underlying disk stores (ex. RocksDB). This is
    because Joplin cannot close the Crux node after every
-   operation or the in-memory Crux node won't work."
+   operation or the in-memory Crux node won't work.
+
+  This method exists as a convenience and living documentation.
+  Prefer `(with-open (get-node conf))` wherever possible."
   []
   (when @crux-node
    (.close @crux-node)))
