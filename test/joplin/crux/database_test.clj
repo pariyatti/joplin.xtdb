@@ -8,13 +8,22 @@
             [joplin.repl :as repl]
             [seeds.crux]))
 
+;; WARNING: Joplin's ability to parse and eval migration and seed
+;;          files seems surprisingly fragile, and running these
+;;          tests from a REPL may cause inconsistent compiler
+;;          failures. If the tests are working from `lein test`
+;;          but fail at the REPL, compile these files and try again:
+;;
+;;          test-resources/joplin/migrators/crux/20210302000000_test.clj
+;;          test/seeds/crux.clj
+
 (def config (*load-config* "joplin-crux.edn"))
 
 (defn crux-conf []
   (-> config :databases :crux-dev :conf))
 
 (defn destroy-node! []
-  (reset! sut/crux-node nil)
+  (sut/close!)
   (sut/get-node (crux-conf)))
 
 (defn destroy-fixture-file-copies! []
@@ -37,7 +46,9 @@
   (f)
   (destroy-fixture-file-copies!))
 
-(use-fixtures :each with-empty-node with-fixture-files-cleanup)
+(use-fixtures :each
+  with-empty-node
+  with-fixture-files-cleanup)
 
 (defn query-migrations []
   (x/q (x/db (sut/get-node (crux-conf)))
@@ -108,3 +119,25 @@
                            "**_wakkawakka.clj")
                   (map str)
                   count)))))
+
+(deftest closed-node
+  (testing "knows when the node is closed even with a dirty reference"
+    (let [node (sut/get-node (crux-conf))]
+      (is (sut/node-open? node))
+      (.close node)
+      (is (not (nil? @sut/crux-node)))
+      (is (not (sut/node-open? node)))))
+
+  (testing "explicit close cleans up the reference"
+    (let [node (sut/get-node (crux-conf))]
+      (is (sut/node-open? node))
+      (sut/close!)
+      (is (nil? @sut/crux-node))
+      (is (not (sut/node-open? node)))))
+
+  (testing "get-node always returns a node"
+    (let [node (sut/get-node (crux-conf))]
+      (is (sut/node-open? node))
+      (.close node)
+      (let [node (sut/get-node (crux-conf))]
+        (is (sut/node-open? node))))))

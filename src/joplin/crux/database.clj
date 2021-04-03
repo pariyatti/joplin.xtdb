@@ -5,8 +5,15 @@
 
 (def crux-node (atom nil))
 
+(defn node-open? [node]
+  (when node
+    (try
+      (x/db node)
+      (catch java.lang.IllegalStateException _e_
+          false))))
+
 (defn get-node [conf]
-  (if @crux-node
+  (if (node-open? @crux-node)
     @crux-node
     (reset! crux-node (x/start-node conf))))
 
@@ -28,7 +35,8 @@
   Prefer `(with-open (get-node conf))` wherever possible."
   []
   (when @crux-node
-   (.close @crux-node)))
+    (.close @crux-node))
+  (reset! crux-node nil))
 
 ;; ============================================================================
 ;; Ragtime interface
