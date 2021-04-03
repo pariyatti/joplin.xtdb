@@ -1,4 +1,4 @@
-(defproject org.pariyatti/joplin.crux "0.0.1"
+(defproject org.pariyatti/joplin.crux "0.0.2"
   :description "Crux support for Joplin"
   :url "http://github.com/pariyatti/joplin.crux"
   :scm {:name "git"
