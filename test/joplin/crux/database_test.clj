@@ -22,8 +22,20 @@
 (defn crux-conf []
   (-> config :databases :crux-dev :conf))
 
+(defn rm-rf
+  "Recursively delete a directory."
+  [^java.io.File file & [silently]]
+  (when (.isDirectory file)
+    (doseq [file-in-dir (.listFiles file)]
+      (rm-rf file-in-dir)))
+  (io/delete-file file silently))
+
+(defn destroy-data-dir! []
+  (rm-rf (io/file "data/") true))
+
 (defn destroy-node! []
   (sut/close!)
+  (destroy-data-dir!)
   (sut/get-node (crux-conf)))
 
 (defn destroy-fixture-file-copies! []
@@ -37,16 +49,21 @@
   (io/copy (io/file "test-resources/fixtures/20210306000000_second_migrator.clj")
            (io/file "test-resources/joplin/migrators/crux/20210306000000_second_migrator.clj")))
 
-(defn with-empty-node [f]
+(defn with-empty-node [t]
   (destroy-node!)
-  (f))
+  (t))
 
-(defn with-fixture-files-cleanup [f]
+(defn with-empty-data-dir [t]
+  (destroy-data-dir!)
+  (t))
+
+(defn with-fixture-files-cleanup [t]
   (destroy-fixture-file-copies!)
-  (f)
+  (t)
   (destroy-fixture-file-copies!))
 
 (use-fixtures :each
+  with-empty-data-dir
   with-empty-node
   with-fixture-files-cleanup)
 
@@ -55,10 +72,16 @@
        '{:find [id]
          :where [[e :migrations/id id]]}))
 
+(defn migration-count []
+  (-> (query-migrations) (count)))
+
 (defn query-seeds []
   (x/q (x/db (sut/get-node (crux-conf)))
        '{:find [e]
          :where [[e :hamster/name n]]}))
+
+(defn seed-count []
+  (-> (query-seeds) (count)))
 
 (deftest adding-migrations
   (testing "adds one migration"
@@ -68,14 +91,15 @@
 (deftest removing-migrations
   (testing "removes one migration from 'now'"
     (repl/migrate config :dev)
-    (repl/rollback config :dev :crux-dev 1)
-    (is (= 0 (-> (query-migrations) (count)))))
+    (let [n (migration-count)]
+      (repl/rollback config :dev :crux-dev 1)
+      (is (= (- n 1) (migration-count)))))
 
   (testing "removing a migration does NOT remove it from valid-time history"
     (repl/migrate config :dev)
     (let [between (java.util.Date.)
           _ (Thread/sleep 500)]
-      (is (= 1 (-> (query-migrations) (count))))
+      (is (= 1 (migration-count)))
       (repl/rollback config :dev :crux-dev 1)
       (is (= 1 (-> (x/q (x/db (sut/get-node (crux-conf)) between)
                         '{:find [e]
@@ -86,24 +110,24 @@
   (testing "adds seed data"
     (repl/migrate config :dev)
     (repl/seed config :dev)
-    (is (= 3 (-> (query-seeds) (count))))))
+    (is (= 3 (seed-count)))))
 
 (deftest resetting
   (testing "resetting the node removes and replaces old migrations"
     (destroy-node!)
     (repl/migrate config :dev)
     (repl/seed config :dev)
-    (is (= 1 (-> (query-migrations) (count))))
+    (is (= 1 (migration-count)))
     (repl/reset config :dev :crux-dev)
-    (is (= 1 (-> (query-migrations) (count)))))
+    (is (= 1 (migration-count))))
 
   (testing "resetting the node does NOT remove old seeds"
     (destroy-node!)
     (repl/migrate config :dev)
     (repl/seed config :dev)
-    (is (= 3 (-> (query-seeds) (count))))
+    (is (= 3 (seed-count)))
     (repl/reset config :dev :crux-dev)
-    (is (= 6 (-> (query-seeds) (count))))))
+    (is (= 6 (seed-count)))))
 
 (deftest pending
   (testing "pending knows how many migrations are left to run"

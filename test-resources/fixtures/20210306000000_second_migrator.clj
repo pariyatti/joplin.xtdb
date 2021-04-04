@@ -3,7 +3,9 @@
             [joplin.crux.database :as d]
             [tick.alpha.api :as t]))
 
-(def id "20210306000000-second-migrator")
+;; NOTE: remember not to use the same id as the name of this
+;;       ns or it will collide with joplin's migrator ids.
+(def id "second-migrator-id")
 
 (defn up [db]
   (let [node (d/get-node (:conf db))

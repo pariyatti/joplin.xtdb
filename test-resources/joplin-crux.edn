@@ -1,7 +1,22 @@
 {:migrators {:crux-mig "test-resources/joplin/migrators/crux"}
  :seeds     {:crux-seed "seeds.crux/run"}
+
  :databases {:crux-dev {:type :crux
-                        :conf {}}}
+                        :conf {:crux/tx-log
+                               {:kv-store {:crux/module crux.rocksdb/->kv-store
+	                                         :db-dir      "data/test/tx-log"
+                                           :sync?       true}}
+	                             :crux/document-store
+                               {:kv-store {:crux/module crux.rocksdb/->kv-store
+	                                         :db-dir      "data/test/doc-store"
+                                           :sync?       true}}
+                               :crux/index-store
+                               {:kv-store {:crux/module crux.rocksdb/->kv-store
+	                                         :db-dir      "data/test/index-store"
+                                           :sync?       true}}
+                               :crux.lucene/lucene-store
+                               {:db-dir "data/test/lucene-dir"}}}}
+
  :environments {:dev [{:db       :crux-dev
                        :migrator :crux-mig
                        :seed     :crux-seed}]}}
