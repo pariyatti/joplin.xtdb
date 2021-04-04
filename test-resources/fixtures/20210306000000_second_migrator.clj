@@ -12,9 +12,11 @@
         txs [[:crux.tx/put {:crux.db/id id
                             :schema/id id
                             :schema/created-at (t/now)}]]]
-    (d/transact! node txs (format "Migrator '%s' failed to apply." id))))
+    (d/transact! node txs (format "Migrator '%s' failed to apply." id)))
+  (d/close!))
 
 (defn down [db]
   (let [node (d/get-node (:conf db))
         txs [[:crux.tx/delete id]]]
-    (d/transact! node txs (format "Rollback '%s' failed to apply." id))))
+    (d/transact! node txs (format "Rollback '%s' failed to apply." id)))
+  (d/close!))
