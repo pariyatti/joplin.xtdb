@@ -131,13 +131,14 @@ lein deploy clojars
 
 ### Deployment Checklist
 
-1. Bump and commit a new SemVer in `project.clj`.
+1. Bump (drop "SNAPSHOT") and commit a new SemVer in `project.clj`.
 2. Deploy:
 
 ```shell
 lein deploy clojars
 ```
 
+3. Bump and commit `"SemVer+1-SNAPSHOT"`
 
 ## License
 
