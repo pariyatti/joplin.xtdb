@@ -91,6 +91,8 @@ lein test
 
 ## Deploying to Clojars
 
+### One-time Setup
+
 1. Get admin permissions to the [org.pariyatti Clojars group](https://clojars.org/org.pariyatti). This group is already verified against [pariyatti.org](https://pariyatti.org).
 2. Set up GPG:
 
@@ -122,10 +124,20 @@ gpg --default-recipient-self -e ~/.lein/credentials.clj > ~/.lein/credentials.cl
 ```
 
 6. Try it out:
- 
+
 ```shell
 lein deploy clojars
 ```
+
+### Deployment Checklist
+
+1. Bump and commit a new SemVer in `project.clj`.
+2. Deploy:
+
+```shell
+lein deploy clojars
+```
+
 
 ## License
 
