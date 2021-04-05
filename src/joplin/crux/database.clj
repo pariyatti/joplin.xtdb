@@ -17,6 +17,7 @@
          RocksDB errors on a shared node. However, it should be used
          everywhere else."
   [conf]
+  (assert (isa? (class conf) clojure.lang.IPersistentMap))
   (if (node-open? @crux-node)
     @crux-node
     (reset! crux-node (x/start-node conf))))
