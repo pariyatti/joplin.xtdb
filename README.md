@@ -8,12 +8,12 @@ Migrate and seed Crux data.
 
 lein / boot:
 ```clojure
-[org.pariyatti/joplin.crux "0.0.2"]
+[org.pariyatti/joplin.crux "0.0.3"]
 ```
 
 CLI / deps.edn:
 ```clojure
-org.pariyatti/joplin.crux {:mvn/version "0.0.2"}
+org.pariyatti/joplin.crux {:mvn/version "0.0.3"}
 ```
 
 ## Usage - Clojure
