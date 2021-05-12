@@ -42,7 +42,7 @@ You can run a lein alias from the command line if you configure them in your `pr
           "rollback" ["run" "-m" "joplin.crux.alias/rollback" "joplin/config.edn"]
           "reset"    ["run" "-m" "joplin.crux.alias/reset"    "joplin/config.edn"]
           "pending"  ["run" "-m" "joplin.crux.alias/pending"  "joplin/config.edn"]
-          "create"   ["run" "-m" "joplin.crux.alias/create"   "joplin/config.edn"]}
+          "create"   ["run" "-m" "joplin.crux.alias/create"   "joplin/config.edn" "dev" "crux-dev"]}
 ```
 
 Then you can run Joplin commands from the command line:
@@ -61,13 +61,13 @@ lein pending prod crux-prod
 ## Generate Migrations
 
 ```clojure
-(joplin.repl/create config :prod :crux-prod "add_users_schema")
+(joplin.repl/create config :dev :crux-dev "add_users_schema")
 ```
 
 or
 
 ```shell
-lein create prod crux-prod add_users_schema
+lein create add_users_schema
 ```
 
 ## Additional Documentation
