@@ -1,19 +1,19 @@
-# joplin.crux
+# joplin.xtdb
 
-Migrate and seed Crux data.
+Migrate and seed XTDB data.
 
-[![Clojars Project](https://img.shields.io/clojars/v/org.pariyatti/joplin.crux.svg)](https://clojars.org/org.pariyatti/joplin.crux)
+[![Clojars Project](https://img.shields.io/clojars/v/org.pariyatti/joplin.xtdb.svg)](https://clojars.org/org.pariyatti/joplin.xtdb)
 
 ## Install
 
 lein / boot:
 ```clojure
-[org.pariyatti/joplin.crux "0.0.3"]
+[org.pariyatti/joplin.xtdb "0.0.4-SNAPSHOT"]
 ```
 
 CLI / deps.edn:
 ```clojure
-org.pariyatti/joplin.crux {:mvn/version "0.0.3"}
+org.pariyatti/joplin.xtdb {:mvn/version "0.0.4-SNAPSHOT"}
 ```
 
 ## Usage - Clojure
@@ -21,15 +21,15 @@ org.pariyatti/joplin.crux {:mvn/version "0.0.3"}
 You can use the `joplin.repl` namespace from within Clojure itself. In these examples:
 - `config` is an example Joplin Config (EDN)
 - `:prod` is an example _environment_
-- `:crux-prod` is an example _database_
+- `:xtdb-prod` is an example _database_
 
 ```clojure
 (joplin.repl/migrate config :prod)
-(joplin.repl/rollback config :prod :crux-prod 1)
-;; or (joplin.repl/rollback config :prod :crux-prod 20151215114952-users)
+(joplin.repl/rollback config :prod :xtdb-prod 1)
+;; or (joplin.repl/rollback config :prod :xtdb-prod 20151215114952-users)
 (joplin.repl/seed config :prod)
-(joplin.repl/reset config :prod :crux-prod)
-(joplin.repl/pending config :prod :crux-prod)
+(joplin.repl/reset config :prod :xtdb-prod)
+(joplin.repl/pending config :prod :xtdb-prod)
 ```
 
 ## Usage - Command Line
@@ -37,31 +37,31 @@ You can use the `joplin.repl` namespace from within Clojure itself. In these exa
 You can run a lein alias from the command line if you configure them in your `project.clj`, like so:
 
 ```clojure
-:aliases {"migrate"  ["run" "-m" "joplin.crux.alias/migrate"  "joplin/config.edn"]
-          "seed"     ["run" "-m" "joplin.crux.alias/seed"     "joplin/config.edn"]
-          "rollback" ["run" "-m" "joplin.crux.alias/rollback" "joplin/config.edn"]
-          "reset"    ["run" "-m" "joplin.crux.alias/reset"    "joplin/config.edn"]
-          "pending"  ["run" "-m" "joplin.crux.alias/pending"  "joplin/config.edn"]
-          "create"   ["run" "-m" "joplin.crux.alias/create"   "joplin/config.edn" "dev" "crux-dev"]}
+:aliases {"migrate"  ["run" "-m" "joplin.xtdb.alias/migrate"  "joplin/config.edn"]
+          "seed"     ["run" "-m" "joplin.xtdb.alias/seed"     "joplin/config.edn"]
+          "rollback" ["run" "-m" "joplin.xtdb.alias/rollback" "joplin/config.edn"]
+          "reset"    ["run" "-m" "joplin.xtdb.alias/reset"    "joplin/config.edn"]
+          "pending"  ["run" "-m" "joplin.xtdb.alias/pending"  "joplin/config.edn"]
+          "create"   ["run" "-m" "joplin.xtdb.alias/create"   "joplin/config.edn" "dev" "xtdb-dev"]}
 ```
 
 Then you can run Joplin commands from the command line:
 
 ```shell
 lein migrate prod
-lein rollback prod crux-prod 1
-# or lein rollback prod crux-prod 20151215114952-users
+lein rollback prod xtdb-prod 1
+# or lein rollback prod xtdb-prod 20151215114952-users
 lein seed prod
-lein reset prod crux-prod
-lein pending prod crux-prod
+lein reset prod xtdb-prod
+lein pending prod xtdb-prod
 ```
 
-**NOTE:** You must refer to the `joplin.crux.alias` shim in your aliases, unlike the [default alias configuration seen in the joplin.core example.](https://github.com/juxt/joplin/blob/master/example/project.clj#L15). Because `joplin.crux` is a plugin, `joplin.alias` doesn't know about it out of the box. This is arguably a bug in Joplin.
+**NOTE:** You must refer to the `joplin.xtdb.alias` shim in your aliases, unlike the [default alias configuration seen in the joplin.core example.](https://github.com/juxt/joplin/blob/master/example/project.clj#L15). Because `joplin.xtdb` is a plugin, `joplin.alias` doesn't know about it out of the box. This is arguably a bug in Joplin.
 
 ## Generate Migrations
 
 ```clojure
-(joplin.repl/create config :dev :crux-dev "add_users_schema")
+(joplin.repl/create config :dev :xtdb-dev "add_users_schema")
 ```
 
 or
@@ -79,7 +79,7 @@ lein create add_users_schema
 
 ## TODO
 
-- It was suggested by @jarohen that `joplin.crux` could use [Transaction Functions](https://opencrux.com/reference/21.02-1.15.0/transactions.html#transaction-functions) to ensure that all migrations executed at once share the same `tx-time`. This will definitely make the historical timeline for schema and data migrations cleaner, but it also requires a "meta schema change" of sorts, which is the Transaction Function itself. I'm a bit nervous making any assumptions about what sort of entities the consumers of `joplin.crux` want in their database, so I've left the direct (naive) implementation for now. This upgrade can always come later without impacting historical migrations.
+- It was suggested by @jarohen that `joplin.xtdb` could use [Transaction Functions](https://xtdb.com/reference/transactions.html#transaction-functions) to ensure that all migrations executed at once share the same `tx-time`. This will definitely make the historical timeline for schema and data migrations cleaner, but it also requires a "meta schema change" of sorts, which is the Transaction Function itself. I'm a bit nervous making any assumptions about what sort of entities the consumers of `joplin.xtdb` want in their database, so I've left the direct (naive) implementation for now. This upgrade can always come later without impacting historical migrations.
 
 ## Developing
 

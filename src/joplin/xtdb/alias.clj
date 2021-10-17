@@ -1,4 +1,4 @@
-(ns joplin.crux.alias
+(ns joplin.xtdb.alias
   (:require [joplin.alias]
             [joplin.repl]))
 
@@ -10,4 +10,4 @@
 (def create joplin.alias/create)
 
 (ns joplin.repl
-  (:require [joplin.crux.database]))
+  (:require [joplin.xtdb.database]))

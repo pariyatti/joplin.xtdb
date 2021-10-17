@@ -1,29 +1,29 @@
-(ns joplin.migrators.crux.20210317020346-add-image-artefacts
-  (:require [crux.api :as x]
-            [joplin.crux.database :as d]
+(ns joplin.migrators.xtdb.20210317020346-add-image-artefacts
+  (:require [xtdb.api :as xt]
+            [joplin.xtdb.database :as d]
             [tick.alpha.api :as t]))
 
 ;; NOTE: this file is really more of a sample and should be moved into
-;;       the joplin.crux tests -sd
+;;       the joplin.xtdb tests -sd
 
 (defn mk-tx-fn [node]
   (d/transact! node
-               [[:crux.tx/put {:crux.db/id :add-owner
-	                 :crux.db/fn '(fn [ctx]
-	                                (let [db (crux.api/db ctx)
-                                        ids (crux.api/q db
+               [[::xt/put {:xt/id :add-owner
+	                 :xt/fn '(fn [ctx]
+	                                (let [db (xtdb.api/db ctx)
+                                        ids (xtdb.api/q db
                                                         '{:find  [e]
                                                           :where [[e :type "image-artefact"]]})
-                                        entities (map #(crux.api/entity db (first %)) ids)]
+                                        entities (map #(xtdb.api/entity db (first %)) ids)]
                                     (vec (map (fn [entity]
-                                                [:crux.tx/put (assoc entity :owner nil)])
+                                                [::xt/put (assoc entity :owner nil)])
                                               entities))
 	                                  ))}]]
                (format "Migration '%s' failed to apply." (ns-name *ns*))))
 
 (defn run-tx-fn [node]
   (d/transact! node
-               [[:crux.tx/fn
+               [[::xt/fn
 	               :add-owner]]
                (format "Migration '%s' failed to apply." (ns-name *ns*))))
 
@@ -32,7 +32,7 @@
     (mk-tx-fn node)
     (run-tx-fn node))
   ;; (let [node (d/get-node (:conf db))
-  ;;       txs [[:crux.tx/put {:crux.db/id id
+  ;;       txs [[::xt/put {:xt/id id
   ;;                           :schema/id id
   ;;                           :schema/created-at (t/now)}]]]
   ;;   (d/transact! node txs (format "Migrator '%s' failed to apply." id)))
@@ -42,6 +42,6 @@
 
 (defn down [db]
   ;; (let [node (d/get-node (:conf db))
-  ;;       txs [[:crux.tx/delete id]]]
+  ;;       txs [[::xt/delete id]]]
   ;;   (d/transact! node txs (format "Rollback '%s' failed to apply." id)))
   )

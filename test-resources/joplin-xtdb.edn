@@ -1,0 +1,22 @@
+{:migrators {:xtdb-mig "test-resources/joplin/migrators/xtdb"}
+ :seeds     {:xtdb-seed "seeds.xtdb/run"}
+
+ :databases {:xtdb-dev {:type :xtdb
+                        :conf {:xtdb/tx-log
+                               {:kv-store {:xtdb/module xtdb.rocksdb/->kv-store
+	                                    :db-dir      "data/test/tx-log"
+                                           :sync?       true}}
+	                        :xtdb/document-store
+                               {:kv-store {:xtdb/module xtdb.rocksdb/->kv-store
+	                                    :db-dir      "data/test/doc-store"
+                                           :sync?       true}}
+                               :xtdb/index-store
+                               {:kv-store {:xtdb/module xtdb.rocksdb/->kv-store
+	                                    :db-dir      "data/test/index-store"
+                                           :sync?       true}}
+                               :xtdb.lucene/lucene-store
+                               {:db-dir "data/test/lucene-dir"}}}}
+
+ :environments {:dev [{:db       :xtdb-dev
+                       :migrator :xtdb-mig
+                       :seed     :xtdb-seed}]}}

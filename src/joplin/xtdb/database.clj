@@ -1,50 +1,50 @@
-(ns joplin.crux.database
-  (:require [crux.api :as x]
+(ns joplin.xtdb.database
+  (:require [xtdb.api :as xt]
             [joplin.core :refer :all] ;; clojure-lsp hates `:refer :all` for some reason
             [ragtime.protocols :refer [DataStore]]))
 
-(def crux-node (atom nil))
+(def xtdb-node (atom nil))
 
 (defn node-open? [node]
   (when node
     (try
-      (x/status node)
+      (xt/status node)
       (catch java.lang.IllegalStateException _e_
         false))))
 
 (defn get-node
-  "NOTE: `with-open` is not used within joplin.crux because it causes
+  "NOTE: `with-open` is not used within joplin.xtdb because it causes
          RocksDB errors on a shared node. However, it should be used
          everywhere else."
   [conf]
   (assert (isa? (class conf) clojure.lang.IPersistentMap))
-  (if (node-open? @crux-node)
-    @crux-node
-    (reset! crux-node (x/start-node conf))))
+  (if (node-open? @xtdb-node)
+    @xtdb-node
+    (reset! xtdb-node (xt/start-node conf))))
 
 (defn transact! [node txns & [error-msg]]
   (let [tx (->> txns
-                (x/submit-tx node)
-                (x/await-tx node))]
-    (when-not (x/tx-committed? node tx)
+                (xt/submit-tx node)
+                (xt/await-tx node))]
+    (when-not (xt/tx-committed? node tx)
       (throw (Exception. error-msg)))))
 
 (defn close!
   "Unfortunately, clients must be responsible for closing
-   the Crux node if they want to use the same REPL with
+   the XTDB node if they want to use the same REPL with
    the same underlying disk stores (ex. RocksDB). This is
-   because Joplin cannot close the Crux node after every
-   operation or the in-memory Crux node won't work.
+   because Joplin cannot close the XTDB node after every
+   operation or the in-memory XTDB node won't work.
 
   This method exists as a convenience and living documentation.
   Prefer `(with-open (get-node conf))` wherever possible."
   []
-  (when @crux-node
-    (.close @crux-node))
-  (reset! crux-node nil))
+  (when @xtdb-node
+    (.close @xtdb-node))
+  (reset! xtdb-node nil))
 
 (defn query-migration-ids [node]
-  (x/q (x/db node)
+  (xt/q (xt/db node)
        '{:find [id created-at]
          :where [[e :migrations/id id]
                  [e :migrations/created-at created-at]]}))
@@ -52,13 +52,13 @@
 ;; ============================================================================
 ;; Ragtime interface
 
-(defrecord CruxDatabase [conf]
+(defrecord XTDBDatabase [conf]
   DataStore
 
   (add-migration-id [this id]
     (let [node (get-node (:conf this))]
       (transact! node
-                 [[:crux.tx/put {:crux.db/id id
+                 [[::xt/put {:xt/id id
                                  :migrations/id id
                                  :migrations/created-at (java.util.Date.)}]]
                  (format "Migration '%s' failed to apply." id))
@@ -66,7 +66,7 @@
 
   (remove-migration-id
     ;; "This function may seem naive, but it is actually the most honest approach.
-    ;;  Crux does not prevent users from using `delete` operations but it *does*
+    ;;  XTDB does not prevent users from using `delete` operations but it *does*
     ;;  force its users to acknowledge that `delete` is a command, not a mutation.
     ;;  Joplin is no exception to this rule. We can 'delete' a migration id just as
     ;;  we would any other data, but the history of the migration remains. Since the
@@ -74,7 +74,7 @@
     [this id]
     (let [node (get-node (:conf this))]
       (transact! node
-                 [[:crux.tx/delete id]]
+                 [[::xt/delete id]]
                  (format "Rollback '%s' failed to apply." id))
       (close!)))
 
@@ -86,27 +86,27 @@
       (close!)
       applied)))
 
-(defn ->CruxDatabase [target]
-  (CruxDatabase. (-> target :db :conf)))
+(defn ->XTDBDatabase [target]
+  (XTDBDatabase. (-> target :db :conf)))
 
 ;; ============================================================================
 ;; Joplin interface
 
-(defmethod migrate-db :crux [target & args]
+(defmethod migrate-db :xtdb [target & args]
   (apply do-migrate (get-migrations (:migrator target))
-         (->CruxDatabase target) args))
+         (->XTDBDatabase target) args))
 
-(defmethod rollback-db :crux [target amount-or-id & args]
+(defmethod rollback-db :xtdb [target amount-or-id & args]
   (apply do-rollback (get-migrations (:migrator target))
-         (->CruxDatabase target) amount-or-id args))
+         (->XTDBDatabase target) amount-or-id args))
 
-(defmethod seed-db :crux [target & args]
+(defmethod seed-db :xtdb [target & args]
   (apply do-seed-fn (get-migrations (:migrator target))
-         (->CruxDatabase target) target args))
+         (->XTDBDatabase target) target args))
 
-(defmethod pending-migrations :crux [target & _args]
-  (do-pending-migrations (->CruxDatabase target)
+(defmethod pending-migrations :xtdb [target & _args]
+  (do-pending-migrations (->XTDBDatabase target)
                            (get-migrations (:migrator target))))
 
-(defmethod create-migration :crux [target id & _args]
-  (do-create-migration target id "joplin.crux.database"))
+(defmethod create-migration :xtdb [target id & _args]
+  (do-create-migration target id "joplin.xtdb.database"))
