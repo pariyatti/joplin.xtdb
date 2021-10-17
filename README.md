@@ -8,12 +8,12 @@ Migrate and seed XTDB data.
 
 lein / boot:
 ```clojure
-[org.pariyatti/joplin.xtdb "0.0.4-SNAPSHOT"]
+[org.pariyatti/joplin.xtdb "0.0.4"]
 ```
 
 CLI / deps.edn:
 ```clojure
-org.pariyatti/joplin.xtdb {:mvn/version "0.0.4-SNAPSHOT"}
+org.pariyatti/joplin.xtdb {:mvn/version "0.0.4"}
 ```
 
 ## Usage - Clojure

@@ -1,4 +1,4 @@
-(defproject org.pariyatti/joplin.xtdb "0.0.4-SNAPSHOT"
+(defproject org.pariyatti/joplin.xtdb "0.0.4"
   :description "XTDB support for Joplin"
   :url "http://github.com/pariyatti/joplin.xtdb"
   :scm {:name "git"

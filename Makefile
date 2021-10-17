@@ -1,4 +1,4 @@
-.PHONY: help deps test repl
+.PHONY: help deps test repl deploy
 # HELP sourced from https://gist.github.com/prwhite/8168133
 
 # Add help text after each target name starting with '\#\#'
@@ -28,3 +28,6 @@ test: ##@Development Run tests with lein
 
 repl: ##@Development Start a Clojure REPL
 	XTDB_ENABLE_BYTEUTILS_SHA1=true lein repl
+
+deploy: ##@Clojars Deploy to clojars.org
+	lein deploy clojars
